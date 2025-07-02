@@ -11,3 +11,8 @@ COPY ./lib/ ./lib/
 COPY ./web/ ./web/
 
 RUN flutter build web --release
+
+FROM nginx
+EXPOSE 3000
+COPY ./nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=build-web /client/build/web /usr/share/nginx/html
