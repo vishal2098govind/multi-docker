@@ -1,11 +1,15 @@
 services:
+  nginx:
+    restart: always
+    build:
+      context: ./nginx
+    ports:
+      - 3000:80
   client:
     build:
       context: ./client
-    ports:
-      - 3000:3000
 
-  server:
+  api:
     build:
       context: ./server
       dockerfile: Dockerfile
