@@ -1,11 +1,12 @@
 FROM golang:1.24
 
-WORKDIR /server
+WORKDIR "/server"
 
-COPY go.mod go.sum ./
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
 
 COPY . .
-RUN go build -v -o server ./...
+RUN go build -v -o ./cmd/server ./...
 
-CMD ["./server"]
+CMD ["./cmd/server"]

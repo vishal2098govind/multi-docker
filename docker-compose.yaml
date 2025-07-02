@@ -1,0 +1,18 @@
+services:
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    volumes:
+      - /server/cmd
+      - ./server:/server
+    ports:
+      - 8080:8080
+
+  worker:
+    build:
+      context: ./worker
+      dockerfile: ./Dockerfile
+    volumes:
+      - /worker/cmd
+      - ./worker:/worker

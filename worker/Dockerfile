@@ -6,6 +6,6 @@ COPY go.mod ./
 RUN go mod download
 
 COPY . .
-RUN go build -v -o worker ./...
+RUN go build -v -o ./cmd/worker ./...
 
-CMD [ "./worker" ]
+CMD [ "./cmd/worker" ]
