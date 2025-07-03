@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -82,17 +83,19 @@ func main() {
 
 		err := db.Exec(`INSERT INTO NUMBERS(value) VALUES (?)`, req.Value).Error
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
-		_, err = rdb.HSet(c, "numbers", map[string]interface{}{fmt.Sprintf("%v", req.Value): req.Value}).Result()
+		r, err := json.Marshal(req)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
-				"error": err.Error(),
-			})
+			c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to marshal: %v", err.Error())})
+			return
+		}
+
+		_, err = rdb.Publish(c, "number", string(r)).Result()
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
 
