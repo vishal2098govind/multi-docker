@@ -31,29 +31,40 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+  TextEditingController controller = TextEditingController();
 
   List allValues = [];
 
   Map currentValues = {};
 
+  final dio = Dio(BaseOptions(baseUrl: "http://localhost:3050/"));
+
   @override
   void initState() {
     super.initState();
-    Dio().get("http://localhost:3000/api/values/all").then((e) {
-      setState(() {
-        var data = e.data["values"];
-        allValues = switch (data) {
-          List() => data,
-          _ => <int>[],
-        };
-      });
-    });
-    Dio().get("http://localhost:3000/api/values/current").then((e) {
+    fetchAllValues();
+    fetchCurrentValues();
+  }
+
+  void fetchCurrentValues() {
+    dio.get("api/values/current").then((e) {
       setState(() {
         var data = e.data["values"];
         currentValues = switch (data) {
           Map() => data,
           _ => {},
+        };
+      });
+    });
+  }
+
+  void fetchAllValues() {
+    dio.get("api/values/all").then((e) {
+      setState(() {
+        var data = e.data["values"];
+        allValues = switch (data) {
+          List() => data,
+          _ => <int>[],
         };
       });
     });
@@ -80,6 +91,15 @@ class _MyHomePageState extends State<MyHomePage> {
             const Text('You have pushed the button this many times:'),
             Text("all values: $allValues"),
             Text("current values: $currentValues"),
+            SizedBox(
+              width: 200,
+              child: TextField(
+                controller: controller,
+                onSubmitted: (_) => handle(),
+                autofocus: true,
+              ),
+            ),
+            ElevatedButton(onPressed: handle, child: Text("Submit")),
             Text(
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
@@ -92,6 +112,16 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
+    );
+  }
+
+  void handle() {
+    dio.post("api/values", data: {"value": int.tryParse(controller.text)}).then(
+      (e) {
+        fetchAllValues();
+        fetchCurrentValues();
+        controller.clear();
+      },
     );
   }
 }

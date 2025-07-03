@@ -1,15 +1,21 @@
 services:
   nginx:
+    depends_on:
+      - api
+      - client
     restart: always
     build:
       context: ./nginx
     ports:
-      - 3000:80
+      - 3050:80
   client:
     build:
       context: ./client
 
   api:
+    depends_on:
+      - go_db
+    restart: always
     build:
       context: ./server
       dockerfile: Dockerfile
@@ -19,6 +25,16 @@ services:
     ports:
       - 8080:8080
 
+  go_db:
+    image: postgres
+    volumes:
+      - ./data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=password
+
+  redis_db:
+    image: redis
+
   worker:
     build:
       context: ./worker
@@ -26,3 +42,6 @@ services:
     volumes:
       - /worker/cmd
       - ./worker:/worker
+
+volumes:
+  data: {}
